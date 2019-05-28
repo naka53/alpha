@@ -1,5 +1,5 @@
 # alpha
-alpha is a simple kernel rootkit (Linux arm64) to DoS attack the TrustZone. He erases the smc_handle function of the kernel to block calls to the SMC instruction.   
+alpha is a simple kernel rootkit (Linux arm64) to DoS attack the TrustZone. He erases the smc_handle function of the kernel to block calls to the SMC instruction. It has been tested with OP-TEE but should work with any other TrustZone implementation.
 
 ### __arm_smccc_smc (include/linux/arm-smccc.h)   
    
