@@ -19,12 +19,14 @@ c0 03 5f d6     ret
    
 ### Basic attack   
    
-Replace the first instruction of the function :   
+Replace the first instruction of the function:   
 ```   
 03 00 00 d4     smc   #0x0   
 ```   
 
-With the following instruction :   
+With the following instruction:   
 ```   
 d5 03 20 1f     nop      
 ```   
+   
+### More coming...
