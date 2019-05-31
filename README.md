@@ -35,5 +35,5 @@ d5 03 20 1f     nop
 ### References.  
 
 http://infocenter.arm.com/help/topic/com.arm.doc.den0028b/ARM_DEN0028B_SMC_Calling_Convention.pdf   
-https://elixir.bootlin.com/linux/v4.19/source/include/linux/arm-smccc.h   
-https://elixir.bootlin.com/linux/v4.19/source/arch/arm64/kernel/smccc-call.S   
+https://github.com/torvalds/linux/blob/master/include/linux/arm-smccc.h   
+https://github.com/torvalds/linux/blob/master/arch/arm64/kernel/smccc-call.S   
