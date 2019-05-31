@@ -17,9 +17,9 @@ a4 00 00 b4     cbz   x4, 0x00000028
 c0 03 5f d6     ret
 ```   
    
-### Basic attack   
+### DoS attack   
    
-It's just a DoS attack of the TrustZone. Replace the first instruction of the function:   
+Replace the first instruction of the function:   
 ```   
 03 00 00 d4     smc   #0x0   
 ```   
