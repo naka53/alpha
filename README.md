@@ -32,6 +32,18 @@ With the following instruction:
 d5 03 20 1f     nop      
 ```   
 
+### Hook attack    
+
+First step is to jump to our hook function:    
+```
+
+```
+
+Next, the hook function have to manage the register to be able to continue to the SMC call:    
+```
+
+```
+
 ### References   
 
 http://infocenter.arm.com/help/topic/com.arm.doc.den0028b/ARM_DEN0028B_SMC_Calling_Convention.pdf   
