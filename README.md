@@ -32,7 +32,7 @@ With the following instruction:
 d5 03 20 1f     nop      
 ```   
 
-### References.  
+### References   
 
 http://infocenter.arm.com/help/topic/com.arm.doc.den0028b/ARM_DEN0028B_SMC_Calling_Convention.pdf   
 https://github.com/torvalds/linux/blob/master/include/linux/arm-smccc.h   
