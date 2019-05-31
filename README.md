@@ -16,9 +16,6 @@ alpha is a simple kernel rootkit (Linux arm64) to attack the TrustZone. He erase
    str   x6, [x4, ARM_SMCCC_QUIRK_STATE_OFFS]
    ret
 ```   
-
-First line is obviously le SMC call.
-
    
 ### DoS attack   
    
