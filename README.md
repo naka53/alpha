@@ -16,6 +16,9 @@ a4 00 00 b4     cbz   x4, 0x00000028
 86 04 00 f9     str   x6, [x4,#8]   
 c0 03 5f d6     ret
 ```   
+
+First line is obviously le SMC call.
+
    
 ### DoS attack   
    
@@ -29,4 +32,8 @@ With the following instruction:
 d5 03 20 1f     nop      
 ```   
 
-### More coming...
+### References.  
+
+http://infocenter.arm.com/help/topic/com.arm.doc.den0028b/ARM_DEN0028B_SMC_Calling_Convention.pdf   
+https://elixir.bootlin.com/linux/v4.19/source/include/linux/arm-smccc.h   
+https://elixir.bootlin.com/linux/v4.19/source/arch/arm64/kernel/smccc-call.S   
