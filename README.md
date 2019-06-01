@@ -1,7 +1,7 @@
 # alpha
 alpha is a simple kernel rootkit (Linux arm64) to attack the TrustZone. He erases the smc_handle function of the kernel to hook calls to the SMC instruction. It has been tested with OP-TEE but should work with any other TrustZone implementation.
 
-### __arm_smccc_smc (arch/arm64/kernel/smccc-call.S)   
+### arm_smccc_smc (arch/arm64/kernel/smccc-call.S)   
    
 ```   
    smc   #0
@@ -19,7 +19,7 @@ alpha is a simple kernel rootkit (Linux arm64) to attack the TrustZone. He erase
    
 ### DoS attack   
    
-Replace the first instruction of the function:   
+It's the easiest way to avoid SMC call. Replace the first instruction of the function:   
 ```   
 03 00 00 d4     smc   #0x0   
 ```   
@@ -31,7 +31,7 @@ d5 03 20 1f     nop
 
 ### Hook attack    
 
-First step is to jump to our hook function:    
+The purpose of this attack is to insert our routine function in arm_smccc_smc to manage the SMC call. First step is to jump to our hook function:    
 ```
 
 ```
