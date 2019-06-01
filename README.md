@@ -21,7 +21,7 @@ alpha is a simple kernel rootkit (Linux arm64) to attack the TrustZone. He erase
    
 Replace the first instruction of the function:   
 ```   
-03 00 00 d4     smc   #0x0   
+03 00 00 d4.    smc   #0x0   
 ```   
 
 With the following instruction:   
