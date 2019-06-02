@@ -38,7 +38,7 @@ The purpose of this attack is to insert our routine function in __arm_smccc_smc 
    .dword [hook_address]
 ```
 
-Next, the hook function have to manage the register to be able to continue to the SMC call. We have to re-write the routine that has been erased and put it at the end of our hook function:    
+Next, the hook function have to manage the SMC call. We have to re-write the routine that has been erased and put it at the end of our hook function:    
 ```
    __asm__( "smc #0;"
             "ldr x4, [sp];"
