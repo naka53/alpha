@@ -33,7 +33,9 @@ d5 03 20 1f     nop
 
 The purpose of this attack is to insert our routine function in __arm_smccc_smc to filter the SMC call. First step is to jump to our hook function:    
 ```
-
+   ldr   x8, .+8
+   br    x8
+   .dword [hook_address]
 ```
 
 Next, the hook function have to manage the register to be able to continue to the SMC call:    
