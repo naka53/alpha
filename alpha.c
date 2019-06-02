@@ -24,11 +24,8 @@ void hook(void)
 		"ldr x9, [x4];"
 		"cmp x9, #0x1;"
 		"b.ne 0x00000028;"
-		"str x6, [x4,#8];");
-
-	printk(KERN_INFO "routine is OK");
-
-	__asm__("ret;");
+		"str x6, [x4,#8];"
+		"ret;");
 }
 
 static void set_pte_write(void)
