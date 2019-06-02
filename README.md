@@ -29,7 +29,7 @@ With the following instruction:
 d5 03 20 1f     nop      
 ```   
 
-### MITM (Man In The Middle)    
+### Hook 
 
 The purpose of this attack is to insert our routine function in __arm_smccc_smc to filter the SMC call. First step is to jump to our hook function:    
 ```
