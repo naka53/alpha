@@ -17,7 +17,7 @@ alpha is a simple kernel rootkit (Linux arm64) to attack the TrustZone. He erase
    ret
 ```   
    
-### DoS attack   
+### DoS (Denial of Service)   
    
 It's the easiest way to avoid SMC call. Replace the first instruction of the function:   
 ```   
@@ -29,7 +29,7 @@ With the following instruction:
 d5 03 20 1f     nop      
 ```   
 
-### MITM attack    
+### MITM (Man In The Middle)    
 
 The purpose of this attack is to insert our routine function in __arm_smccc_smc to filter the SMC call. First step is to jump to our hook function:    
 ```
