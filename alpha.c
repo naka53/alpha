@@ -47,7 +47,8 @@ asmlinkage void hook(unsigned long a0, unsigned long a1, unsigned long a2,
 		"ldr x9, [x4];"
 		"cmp x9, #0x1;"
 		"b.ne .+8;"
-		"str x6, [x4,#8];");
+		"str x6, [x4,#8];"
+		"ret;");
 }
 
 static void set_pte_write(void)
