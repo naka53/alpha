@@ -49,8 +49,12 @@ Next, the hook function have to manage the SMC call. We have to re-write the rou
             "ldr x9, [x4];"
             "cmp x9, #0x1;"
             "b.ne 0x00000028;"
-            "str x6, [x4,#8];"
-            "ret;");
+            "str x6, [x4,#8];");
+```
+
+In order to have the ability to do anything inside the hook function, we have to save registers. We add a pre-routine and a post-routine in the hook function:
+```
+
 ```
 
 ### References   

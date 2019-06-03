@@ -11,21 +11,43 @@ static pte_t *ptep;
 static struct mm_struct *mm;
 static uint8_t buff[16];
 
-void hook(void)
+asmlinkage void hook(unsigned long a0, unsigned long a1, unsigned long a2,
+		     unsigned long a3, unsigned long a4, unsigned long a5,
+		     unsigned long a6, unsigned long a7,
+		     struct arm_smccc_res *res, struct arm_smccc_quirk *quirk)
 {
-	printk(KERN_INFO "WE'RE IN!");
+	/* pre-routine to save registers */
+	__asm__("sub sp, sp, #24;"
+		"str x0, [sp];"
+		"str x1, [sp, #-8];"
+		"str x2, [sp, #-16];"
+		"str x3, [sp, #-24];"
+		"str x4, [sp, #-32];"
+		"sub sp, sp, #40;");
 	
+	/* hook function body */
+	printk(KERN_INFO "SMC call hooked!");
+	
+	/* post-routine to get registers */
+	__asm__("add sp, sp, #40;"
+		"ldr x4, [sp, #-32];"
+		"ldr x3, [sp, #-24];"
+		"ldr x2, [sp, #-16];"
+		"ldr x1, [sp, #-8];"
+		"ldr x0, [sp];"
+		"add sp, sp, #24;");
+	
+	/* __arm_smccc_smc function */
 	__asm__("smc #0;"
 		"ldr x4, [sp];"
 		"stp x0, x1, [x4];"
 		"stp x2, x3, [x4,#16];"
 		"ldr x4, [sp,#8];"
-		"cbz x4, 0x00000028;"
+		"cbz x4, .+20;"
 		"ldr x9, [x4];"
 		"cmp x9, #0x1;"
-		"b.ne 0x00000028;"
-		"str x6, [x4,#8];"
-		"ret;");
+		"b.ne .+8;"
+		"str x6, [x4,#8];");
 }
 
 static void set_pte_write(void)
@@ -63,10 +85,7 @@ static void disable_smc_call(void)
 	
 	*(uint32_t *)(__arm_smccc_smc + 0) = 0x58000048;
 	*(uint32_t *)(__arm_smccc_smc + 4) = 0xd61f0100;
-	*(uint32_t *)(__arm_smccc_smc + 8) =
-		(unsigned long)hook & 0x00000000ffffffff;
-	*(uint32_t *)(__arm_smccc_smc + 12) =
-		((unsigned long)hook & 0xffffffff00000000) >> 32;
+	*(uint64_t *)(__arm_smccc_smc + 8) = (unsigned long)hook;
 	
 	set_pte_rdonly();	
 }
@@ -118,7 +137,7 @@ int init_module(void)
 		printk(KERN_INFO "failed pte");
 		return 0;
 	}
-	
+       	
 	disable_smc_call();
 	return 0;
 }
