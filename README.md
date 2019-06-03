@@ -53,9 +53,35 @@ Next, the hook function have to manage the SMC call. We have to re-write the rou
 	    "ret;");
 ```
 
-In order to have the ability to do anything inside the hook function, we have to save registers. We add a pre-routine and a post-routine in the hook function:
+In order to have the ability to do anything inside the hook function, we have to save registers. We add a pre-routine and a post-routine in the hook function. The pre-routine is as follow:
 ```
+   stp   x0, x1, [sp, #-16]!
+   stp   x2, x3, [sp, #-16]!
+   stp   x4, x5, [sp, #-16]!
+   stp   x6, x7, [sp, #-16]!
+   stp   x18, x19, [sp, #-16]!
+   stp   x20, x21, [sp, #-16]!
+   stp   x22, x23, [sp, #-16]!
+   stp   x24, x25, [sp, #-16]!
+   stp   x26, x27, [sp, #-16]!
+   stp   x28, x29, [sp, #-16]!
+   str   x30, [sp, #-8]!
+```   
 
+And the post-routine:
+```
+   ldr   x30, [sp], #8
+   ldp   x28, x29, [sp], #16
+   ldp   x26, x27, [sp], #16
+   ldp   x24, x25, [sp], #16
+   ldp   x22, x23, [sp], #16
+   ldp   x20, x21, [sp], #16
+   ldp   x18, x19, [sp], #16
+   ldp   x6, x7, [sp], #16
+   ldp   x4, x5, [sp], #16
+   ldp   x2, x3, [sp], #16
+   ldp   x0, x1, [sp], #16
+   ldp   x29, x30, [sp], #16
 ```
 
 ### References   

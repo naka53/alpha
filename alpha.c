@@ -1,8 +1,8 @@
-#include <linux/kernel.h>
-#include <linux/module.h>
 #include <linux/arm-smccc.h>
-#include <linux/mm.h>
+#include <linux/kernel.h>
 #include <linux/kallsyms.h>
+#include <linux/mm.h>
+#include <linux/module.h>
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Nathan Castets");
@@ -17,37 +17,46 @@ asmlinkage void hook(unsigned long a0, unsigned long a1, unsigned long a2,
 		     struct arm_smccc_res *res, struct arm_smccc_quirk *quirk)
 {
 	/* pre-routine to save registers */
-	__asm__("sub sp, sp, #24;"
-		"str x0, [sp];"
-		"str x1, [sp, #-8];"
-		"str x2, [sp, #-16];"
-		"str x3, [sp, #-24];"
-		"str x4, [sp, #-32];"
-		"sub sp, sp, #40;");
+	__asm__("stp   x0, x1, [sp, #-16]!;"
+		"stp   x2, x3, [sp, #-16]!;"
+		"stp   x4, x5, [sp, #-16]!;"
+		"stp   x6, x7, [sp, #-16]!;"
+		"stp   x18, x19, [sp, #-16]!;"
+		"stp   x20, x21, [sp, #-16]!;"
+		"stp   x22, x23, [sp, #-16]!;"
+		"stp   x24, x25, [sp, #-16]!;"
+		"stp   x26, x27, [sp, #-16]!;"
+		"stp   x28, x29, [sp, #-16]!;"
+		"str   x30, [sp, #-8]!;");
 	
 	/* hook function body */
 	printk(KERN_INFO "SMC call hooked!");
 	
-	/* post-routine to get registers */
-	__asm__("add sp, sp, #40;"
-		"ldr x4, [sp, #-32];"
-		"ldr x3, [sp, #-24];"
-		"ldr x2, [sp, #-16];"
-		"ldr x1, [sp, #-8];"
-		"ldr x0, [sp];"
-		"add sp, sp, #24;");
+	/* post-routine to get back registers */
+	__asm__("ldr   x30, [sp], #8;"
+		"ldp   x28, x29, [sp], #16;"
+		"ldp   x26, x27, [sp], #16;"
+		"ldp   x24, x25, [sp], #16;"
+		"ldp   x22, x23, [sp], #16;"
+		"ldp   x20, x21, [sp], #16;"
+		"ldp   x18, x19, [sp], #16;"
+		"ldp   x6, x7, [sp], #16;"
+		"ldp   x4, x5, [sp], #16;"
+		"ldp   x2, x3, [sp], #16;"
+		"ldp   x0, x1, [sp], #16;"
+		"ldp   x29, x30, [sp], #16;");
 	
 	/* __arm_smccc_smc function */
-	__asm__("smc #0;"
-		"ldr x4, [sp];"
-		"stp x0, x1, [x4];"
-		"stp x2, x3, [x4,#16];"
-		"ldr x4, [sp,#8];"
-		"cbz x4, .+20;"
-		"ldr x9, [x4];"
-		"cmp x9, #0x1;"
-		"b.ne .+8;"
-		"str x6, [x4,#8];"
+	__asm__("smc   #0;"
+		"ldr   x4, [sp];"
+		"stp   x0, x1, [x4];"
+		"stp   x2, x3, [x4, #16];"
+		"ldr   x4, [sp, #8];"
+		"cbz   x4, .+20;"
+		"ldr   x9, [x4];"
+		"cmp   x9, #0x1;"
+		"b.ne  .+8;"
+		"str   x6, [x4, #8];"
 		"ret;");
 }
 
@@ -78,7 +87,11 @@ static void set_pte_rdonly(void)
 static void disable_smc_call(void)
 {
 	uint32_t i;
-	
+	/*
+	hook(1, 2, 3, 4, 5, 6, 7, 8,
+	     (struct arm_smccc_res *)0x0011223344556677,
+	     (struct arm_smccc_quirk *)0x8844556600332299);
+	*/
 	set_pte_write();
 		 
 	for (i = 0; i < 16; i++)
