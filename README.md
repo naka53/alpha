@@ -45,10 +45,10 @@ Next, the hook function have to manage the SMC call. We have to re-write the rou
             "stp x0, x1, [x4];"
             "stp x2, x3, [x4,#16];"
             "ldr x4, [sp,#8];"
-            "cbz x4, 0x00000028;"
+            "cbz x4, .+20;"
             "ldr x9, [x4];"
             "cmp x9, #0x1;"
-            "b.ne 0x00000028;"
+            "b.ne .+8;"
             "str x6, [x4,#8];");
 ```
 
