@@ -11,53 +11,55 @@ static pte_t *ptep;
 static struct mm_struct *mm;
 static uint8_t buff[16];
 
+__asm__(".extern hook;"
+	"hook_management:;"
+	"stp   x0, x1, [sp, #-16]!   ;"
+	"stp   x2, x3, [sp, #-16]!   ;"
+	"stp   x4, x5, [sp, #-16]!   ;"
+	"stp   x6, x7, [sp, #-16]!   ;"
+	"stp   x18, x19, [sp, #-16]! ;"
+	"stp   x20, x21, [sp, #-16]! ;"
+	"stp   x22, x23, [sp, #-16]! ;"
+	"stp   x24, x25, [sp, #-16]! ;"
+	"stp   x26, x27, [sp, #-16]! ;"
+	"stp   x28, x29, [sp, #-16]! ;"
+	"str   x30, [sp, #-8]!       ;"
+	""
+	"bl    hook                  ;"
+	""
+	"ldr   x30, [sp], #8         ;"
+	"ldp   x28, x29, [sp], #16   ;"
+	"ldp   x26, x27, [sp], #16   ;"
+	"ldp   x24, x25, [sp], #16   ;"
+	"ldp   x22, x23, [sp], #16   ;"
+	"ldp   x20, x21, [sp], #16   ;"
+	"ldp   x18, x19, [sp], #16   ;"
+	"ldp   x6, x7, [sp], #16     ;"
+	"ldp   x4, x5, [sp], #16     ;"
+	"ldp   x2, x3, [sp], #16     ;"
+	"ldp   x0, x1, [sp], #16     ;"
+	""
+	"smc   #0                    ;"
+	"ldr   x4, [sp]              ;"
+	"stp   x0, x1, [x4]          ;"
+	"stp   x2, x3, [x4, #16]     ;"
+	"ldr   x4, [sp, #8]          ;"
+	"cbz   x4, .+20              ;"
+	"ldr   x9, [x4]              ;"
+	"cmp   x9, #0x1              ;"
+	"b.ne  .+8                   ;"
+	"str   x6, [x4, #8]          ;"
+	"ret                         ;");
+
+
+extern void hook_management(void);
+
 asmlinkage void hook(unsigned long a0, unsigned long a1, unsigned long a2,
 		     unsigned long a3, unsigned long a4, unsigned long a5,
 		     unsigned long a6, unsigned long a7,
 		     struct arm_smccc_res *res, struct arm_smccc_quirk *quirk)
-{
-	/* pre-routine to save registers */
-	__asm__("stp   x0, x1, [sp, #-16]!;"
-		"stp   x2, x3, [sp, #-16]!;"
-		"stp   x4, x5, [sp, #-16]!;"
-		"stp   x6, x7, [sp, #-16]!;"
-		"stp   x18, x19, [sp, #-16]!;"
-		"stp   x20, x21, [sp, #-16]!;"
-		"stp   x22, x23, [sp, #-16]!;"
-		"stp   x24, x25, [sp, #-16]!;"
-		"stp   x26, x27, [sp, #-16]!;"
-		"stp   x28, x29, [sp, #-16]!;"
-		"str   x30, [sp, #-8]!;");
-	
-	/* hook function body */
+{	
 	printk(KERN_INFO "SMC call hooked!");
-	
-	/* post-routine to get back registers */
-	__asm__("ldr   x30, [sp], #8;"
-		"ldp   x28, x29, [sp], #16;"
-		"ldp   x26, x27, [sp], #16;"
-		"ldp   x24, x25, [sp], #16;"
-		"ldp   x22, x23, [sp], #16;"
-		"ldp   x20, x21, [sp], #16;"
-		"ldp   x18, x19, [sp], #16;"
-		"ldp   x6, x7, [sp], #16;"
-		"ldp   x4, x5, [sp], #16;"
-		"ldp   x2, x3, [sp], #16;"
-		"ldp   x0, x1, [sp], #16;"
-		"ldp   x29, x30, [sp], #16;");
-	
-	/* __arm_smccc_smc function */
-	__asm__("smc   #0;"
-		"ldr   x4, [sp];"
-		"stp   x0, x1, [x4];"
-		"stp   x2, x3, [x4, #16];"
-		"ldr   x4, [sp, #8];"
-		"cbz   x4, .+20;"
-		"ldr   x9, [x4];"
-		"cmp   x9, #0x1;"
-		"b.ne  .+8;"
-		"str   x6, [x4, #8];"
-		"ret;");
 }
 
 static void set_pte_write(void)
@@ -87,11 +89,7 @@ static void set_pte_rdonly(void)
 static void disable_smc_call(void)
 {
 	uint32_t i;
-	/*
-	hook(1, 2, 3, 4, 5, 6, 7, 8,
-	     (struct arm_smccc_res *)0x0011223344556677,
-	     (struct arm_smccc_quirk *)0x8844556600332299);
-	*/
+
 	set_pte_write();
 		 
 	for (i = 0; i < 16; i++)
@@ -99,7 +97,7 @@ static void disable_smc_call(void)
 	
 	*(uint32_t *)(__arm_smccc_smc + 0) = 0x58000048;
 	*(uint32_t *)(__arm_smccc_smc + 4) = 0xd61f0100;
-	*(uint64_t *)(__arm_smccc_smc + 8) = (unsigned long)hook;
+	*(uint64_t *)(__arm_smccc_smc + 8) = (unsigned long)hook_management;
 	
 	set_pte_rdonly();	
 }
