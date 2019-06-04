@@ -31,29 +31,16 @@ d5 03 20 1f     nop
 
 ### Hook SMC Call
 
-The purpose of this attack is to insert our routine function in __arm_smccc_smc to filter the SMC call. First step is to jump to our hook function:    
+The purpose of this attack is to jump from __arm_smccc_smc to our evil function to filter the SMC call. First step is to jump to our hook function:    
 ```
    ldr   x8, .+8
    br    x8
    .dword [hook_address]
 ```
 
-Next, the hook function have to manage the SMC call. We have to re-write the routine that has been erased and put it at the end of our hook function:    
-```
-   __asm__( "smc #0;"
-            "ldr x4, [sp];"
-            "stp x0, x1, [x4];"
-            "stp x2, x3, [x4,#16];"
-            "ldr x4, [sp,#8];"
-            "cbz x4, .+20;"
-            "ldr x9, [x4];"
-            "cmp x9, #0x1;"
-            "b.ne .+8;"
-            "str x6, [x4,#8];"
-            "ret;");
-```
-
-In order to have the ability to do anything inside the hook function, we have to save registers. We add a pre-routine and a post-routine in the hook function. The pre-routine is as follow:
+Next, the evil function have to manage the SMC call. We have to re-write the routine that has been erased and put it in our hook function.   
+In order to have the ability to do anything inside the evil function and continue to use SMC call, we have to save registers. We add a pre-routine and a post-routine.   
+The pre-routine is as follow:
 ```
    stp   x0, x1, [sp, #-16]!
    stp   x2, x3, [sp, #-16]!
@@ -67,7 +54,6 @@ In order to have the ability to do anything inside the hook function, we have to
    stp   x28, x29, [sp, #-16]!
    str   x30, [sp, #-8]!
 ```   
-
 And the post-routine:
 ```
    ldr   x30, [sp], #8
