@@ -67,7 +67,6 @@ And the post-routine:
    ldp   x4, x5, [sp], #16
    ldp   x2, x3, [sp], #16
    ldp   x0, x1, [sp], #16
-   ldp   x29, x30, [sp], #16
 ```
 
 ### References   
