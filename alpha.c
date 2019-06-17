@@ -123,6 +123,7 @@ int init_module(void)
 
 	printk(KERN_INFO "alpha module started");
 
+        /* can be directly found in kernel memory */
 	mm = (struct mm_struct *)kallsyms_lookup_name("init_mm");
 	init_mm = *mm;
 
